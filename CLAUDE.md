@@ -37,13 +37,9 @@ uv sync
 
 **Run the example demonstration script (start here!):**
 ```bash
-python example_demo.py
+uv run example_demo.py
 ```
 
-**Run the interactive CLI demo:**
-```bash
-python main.py
-```
 
 ### Docker Development (API Server)
 
@@ -81,15 +77,11 @@ curl -X POST "http://localhost:8000/memory/search" \
      -d '{"query": "previous conversations", "user_id": "user123"}'
 ```
 
-**Run interactive CLI demo (override default API command):**
-```bash
-docker-compose exec app uv run python main.py
-```
 
 **Run example demo (local development only):**
 ```bash
 # Note: example_demo.py is designed for local development
-# For Docker users, use the interactive CLI or API instead
+# For Docker users, use the API instead
 ```
 
 **View logs:**
@@ -104,7 +96,7 @@ docker-compose down
 
 ## Key Files
 
-- `main.py` - Core MemoryAgent implementation and interactive CLI
+- `main.py` - Core MemoryAgent implementation
 - `api.py` - FastAPI server exposing the MemoryAgent as REST API
 - `example_demo.py` - Demonstration script showing memory capabilities (local only)
 - `db/` - ChromaDB vector store data (auto-created)

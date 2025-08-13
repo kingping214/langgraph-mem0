@@ -10,7 +10,7 @@ A demonstration of an AI agent with persistent memory capabilities using LangGra
 - **Contextual Responses**: Retrieves relevant memories to provide personalized interactions
 - **Local Embeddings**: Uses Ollama for privacy-focused embedding generation
 - **Workflow Orchestration**: LangGraph manages the memory retrieval and response generation flow
-- **Multiple Interfaces**: Interactive demos, CLI mode, and production-ready REST API
+- **Multiple Interfaces**: Interactive demos, CLI mode, and REST API
 
 ## Architecture
 
@@ -115,13 +115,7 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
         -d '{"message": "Hello!", "user_id": "user123"}'
    ```
 
-5. Optional CLI access:
-   ```bash
-   # Interactive CLI mode (override API server)
-   docker-compose exec app uv run python main.py
-   ```
-
-6. Stop the services:
+5. Stop the services:
    ```bash
    docker-compose down
    ```
@@ -133,7 +127,7 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
 See the memory capabilities in action with the structured demonstration:
 
 ```bash
-python example_demo.py
+uv run example_demo.py
 ```
 
 **What this shows:**
@@ -151,23 +145,9 @@ python example_demo.py
 < "I remember that you're Alice, a software developer from San Francisco. You mentioned..."
 ```
 
-### 💬 Interactive CLI Mode
+### 🌐 REST API
 
-For ongoing conversations with persistent memory:
-
-```bash
-python main.py
-```
-
-**Features:**
-- Remembers everything across sessions (restart the program and it still knows you)
-- Personalized responses based on past conversations
-- Type 'quit' to exit
-- All conversations stored with user ID for memory retrieval
-
-### 🌐 REST API (Production Ready)
-
-For integration with other applications or production deployment:
+For integration with other applications:
 
 **Available Endpoints:**
 - `GET /health` - Health check
@@ -197,16 +177,16 @@ curl -X DELETE "http://localhost:8000/memory/user123"
 **API Benefits:**
 - Rate limiting and security features built-in
 - Proper error handling and logging
-- Ready for production deployment
+- Ready for deployment
 - Supports multiple concurrent users
 
-**Docker Benefits for Production:**
+**Docker Benefits:**
 - **Simplified Setup**: No need to install Python, UV, or Ollama locally
 - **Consistent Environment**: Same runtime across all systems
 - **Isolation**: Application runs in isolated containers
 - **Easy Cleanup**: Remove everything with `docker-compose down`
 - **Automatic Ollama Setup**: Embedded model automatically downloads
-- **Production Ready**: API server with health checks and proper error handling
+- **Includes**: API server with health checks and proper error handling
 
 **Note**: Docker setup includes persistent volumes for database and logs, so your data persists between container restarts.
 
@@ -246,7 +226,7 @@ The memory system is configured in `main.py` with the following components:
 - **Ollama**: Local embedding generation
 - **ChromaDB**: Vector database for memory storage
 - **FastAPI**: REST API framework
-- **Uvicorn**: ASGI server for production deployment
+- **Uvicorn**: ASGI server
 - **SlowAPI**: Rate limiting middleware
 
 ## Rate Limiting
