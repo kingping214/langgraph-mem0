@@ -15,14 +15,32 @@ from mem0 import Memory
 load_dotenv()
 
 # Configure logging for security monitoring
+# Get log level from environment, default to WARNING for console
+console_log_level = getattr(logging, os.getenv('LOG_LEVEL', 'WARNING').upper(), logging.WARNING)
+
+# Configure file handler for comprehensive logging
+file_handler = logging.FileHandler('security.log')
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+
+# Configure console handler for minimal output
+console_handler = logging.StreamHandler()
+console_handler.setLevel(console_log_level)
+console_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+
+# Set root logger to INFO for file logging, but control console output
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('security.log'),
-        logging.StreamHandler()
-    ]
+    handlers=[file_handler, console_handler]
 )
+
+# Suppress third-party library logging in console
+logging.getLogger('httpx').setLevel(logging.WARNING)
+logging.getLogger('anthropic').setLevel(logging.WARNING)
+logging.getLogger('ollama').setLevel(logging.WARNING)
+logging.getLogger('chromadb').setLevel(logging.WARNING)
+logging.getLogger('mem0').setLevel(logging.WARNING)
+
 security_logger = logging.getLogger('security')
 
 class AgentState(TypedDict):
@@ -133,8 +151,10 @@ class MemoryAgent:
         for pattern in dangerous_patterns:
             sanitized = re.sub(pattern, '', sanitized, flags=re.IGNORECASE)
         
-        # Log if sanitization made changes
-        if sanitized != text:
+        # Log only if dangerous patterns were actually detected (not just HTML escaping)
+        original_after_cleanup = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
+        html_escaped = html.escape(original_after_cleanup, quote=True)
+        if sanitized != html_escaped:
             security_logger.warning("Input sanitization applied - potentially malicious content detected")
         
         return sanitized.strip()
