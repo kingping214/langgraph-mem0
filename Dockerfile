@@ -20,7 +20,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen
 
 # Copy application files
-COPY main.py example_demo.py CLAUDE.md SECURITY.md docker-entrypoint.sh ./
+COPY main.py api.py CLAUDE.md SECURITY.md docker-entrypoint.sh ./
 
 # Make entrypoint script executable
 RUN chmod +x docker-entrypoint.sh
@@ -47,5 +47,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 # Set entrypoint
 ENTRYPOINT ["./docker-entrypoint.sh"]
 
-# Default command
-CMD ["uv", "run", "python", "main.py"]
+# Default command - run API server
+CMD ["uv", "run", "python", "api.py"]

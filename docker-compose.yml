@@ -19,13 +19,15 @@ services:
       start_period: 30s
     restart: unless-stopped
 
-  # Main application
+  # Main application - API server
   app:
     build: .
     container_name: langgraph-mem0-app
     depends_on:
       ollama:
         condition: service_healthy
+    ports:
+      - "8000:8000"
     volumes:
       - ./db:/app/db
       - ./logs:/app/logs
@@ -38,8 +40,16 @@ services:
       - OLLAMA_EMBEDDING_DIMS=${OLLAMA_EMBEDDING_DIMS:-768}
       - CHROMA_COLLECTION_NAME=${CHROMA_COLLECTION_NAME:-test}
       - CHROMA_DB_PATH=/app/db
-    stdin_open: true
-    tty: true
+      - HOST=0.0.0.0
+      - PORT=8000
+      - RATE_LIMIT_REQUESTS_PER_MINUTE=${RATE_LIMIT_REQUESTS_PER_MINUTE:-20}
+      - RATE_LIMIT_REQUESTS_PER_HOUR=${RATE_LIMIT_REQUESTS_PER_HOUR:-100}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
     networks:
       - langgraph-network
