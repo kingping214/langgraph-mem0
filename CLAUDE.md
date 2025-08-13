@@ -52,11 +52,12 @@ python example_demo.py
 
 ## Memory Configuration
 
-The memory system is configured in `MemoryAgent.__init__()` with:
-- Ollama embeddings (nomic-embed-text:latest) on localhost:11434
-- Anthropic Claude Sonnet 4.0 for LLM operations
-- ChromaDB vector store in local `db/` directory
-- Collection name: "test"
+The memory system is fully configurable via required environment variables in `MemoryAgent.__init__()`:
+- **Ollama embeddings**: Model, base URL, and dimensions via `OLLAMA_MODEL`, `OLLAMA_BASE_URL`, and `OLLAMA_EMBEDDING_DIMS`
+- **Anthropic LLM**: Model via `ANTHROPIC_MODEL`
+- **ChromaDB vector store**: Database path and collection name via `CHROMA_DB_PATH` and `CHROMA_COLLECTION_NAME`
+
+All configuration must be specified via environment variables - no defaults are provided to ensure explicit configuration.
 
 ## Dependencies
 

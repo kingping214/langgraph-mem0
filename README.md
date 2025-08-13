@@ -67,7 +67,14 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
 5. Configure environment variables:
    ```bash
    cp .env.example .env
-   # Edit .env and add your ANTHROPIC_API_KEY
+   # Edit .env and configure all required variables:
+   # ANTHROPIC_API_KEY=your_api_key_here
+   # ANTHROPIC_MODEL=claude-sonnet-4-0
+   # OLLAMA_MODEL=nomic-embed-text:latest
+   # OLLAMA_BASE_URL=http://localhost:11434
+   # OLLAMA_EMBEDDING_DIMS=768
+   # CHROMA_COLLECTION_NAME=test
+   # CHROMA_DB_PATH=db
    ```
 
 ## Usage

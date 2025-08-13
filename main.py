@@ -23,23 +23,23 @@ class MemoryAgent:
             "embedder": {
                 "provider": "ollama",
                 "config": {
-                    "model": "nomic-embed-text:latest",
-                    "ollama_base_url": "http://localhost:11434",
-                    "embedding_dims": 768
+                    "model": os.getenv("OLLAMA_MODEL"),
+                    "ollama_base_url": os.getenv("OLLAMA_BASE_URL"),
+                    "embedding_dims": int(os.getenv("OLLAMA_EMBEDDING_DIMS"))
                 }
             },
             "llm": {
                 "provider": "anthropic",
                 "config": {
-                    "model": "claude-sonnet-4-0",
+                    "model": os.getenv("ANTHROPIC_MODEL"),
                     "api_key": os.getenv("ANTHROPIC_API_KEY")
                 }
             },
             "vector_store": {
                 "provider": "chroma",
                 "config": {
-                    "collection_name": "test",
-                    "path": "db"
+                    "collection_name": os.getenv("CHROMA_COLLECTION_NAME"),
+                    "path": os.getenv("CHROMA_DB_PATH")
                 }
             }
         })
@@ -87,7 +87,7 @@ class MemoryAgent:
         
         try:
             response = self.anthropic.messages.create(
-                model="claude-sonnet-4-0",
+                model=os.getenv("ANTHROPIC_MODEL"),
                 max_tokens=1000,
                 system=system_prompt,
                 messages=[{"role": "user", "content": last_message}]
