@@ -2,7 +2,7 @@
 
 A demonstration of an AI agent with persistent memory capabilities using LangGraph for workflow orchestration and Mem0 for long-term memory management.
 
-> \ud83d\ude80 **Quick Start**: Jump to the [Quick Demo section](#-quick-demo-start-here) to see the memory capabilities in action!
+> 🚀 **Quick Start**: Jump to the [Quick Demo section](#-quick-demo-start-here) to see the memory capabilities in action!
 
 ## Features
 
