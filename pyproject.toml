@@ -1,7 +1,7 @@
 [project]
-name = "langgraph-mem0-demo"
+name = "langgraph-mem0"
 version = "0.1.0"
-description = "Add your description here"
+description = "A demonstration of an AI agent with persistent memory capabilities using LangGraph for workflow orchestration and Mem0 for long-term memory management."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

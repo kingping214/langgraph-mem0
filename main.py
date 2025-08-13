@@ -6,7 +6,6 @@ from langgraph.graph.message import add_messages
 from typing_extensions import Annotated, TypedDict
 from anthropic import Anthropic
 from mem0 import Memory
-import json
 
 load_dotenv()
 

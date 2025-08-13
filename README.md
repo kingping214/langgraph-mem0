@@ -26,28 +26,38 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
 ### Prerequisites
 
 - Python 3.11+
+- [UV](https://docs.astral.sh/uv/getting-started/installation/) package manager
 - [Ollama](https://ollama.ai/) installed and running
 - Anthropic API key
 
 ### Installation
 
-1. Clone the repository:
+1. Install UV package manager:
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+   Or on Windows:
+   ```powershell
+   powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+   ```
+
+2. Clone the repository:
    ```bash
    git clone <repository-url>
    cd langgraph-mem0
    ```
 
-2. Install dependencies:
+3. Install dependencies:
    ```bash
    uv sync
    ```
 
-3. Set up Ollama embeddings model:
+4. Set up Ollama embeddings model:
    ```bash
    ollama pull nomic-embed-text:latest
    ```
 
-4. Configure environment variables:
+5. Configure environment variables:
    ```bash
    cp .env.example .env
    # Edit .env and add your ANTHROPIC_API_KEY
