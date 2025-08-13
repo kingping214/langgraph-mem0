@@ -85,23 +85,40 @@ def interactive_session():
     print("The agent will remember our conversation for future sessions.\n")
     
     while True:
-        user_input = input("You: ").strip()
-        
-        if user_input.lower() == 'quit':
-            break
-        elif user_input.lower() == 'demo':
-            demo_conversation()
-            continue
+        try:
+            user_input = input("You: ").strip()
             
-        # Process the message
-        result = graph.invoke({
-            "messages": [{"role": "user", "content": user_input}],
-            "user_id": user_id
-        })
-        
-        # Display response
-        if result["messages"]:
-            print(f"Assistant: {result['messages'][-1].content}\n")
+            if user_input.lower() == 'quit':
+                break
+            elif user_input.lower() == 'demo':
+                demo_conversation()
+                continue
+            
+            # Basic input validation
+            if not user_input:
+                print("Please enter a message.")
+                continue
+                
+            if len(user_input) > 10000:
+                print("Message too long. Please keep messages under 10,000 characters.")
+                continue
+                
+            # Process the message
+            result = graph.invoke({
+                "messages": [{"role": "user", "content": user_input}],
+                "user_id": user_id
+            })
+            
+            # Display response
+            if result["messages"]:
+                print(f"Assistant: {result['messages'][-1].content}\n")
+                
+        except KeyboardInterrupt:
+            print("\nGoodbye!")
+            break
+        except Exception as e:
+            print("An unexpected error occurred. Please try again.")
+            continue
 
 
 if __name__ == "__main__":

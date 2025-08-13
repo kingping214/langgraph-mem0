@@ -25,12 +25,13 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
 
 ### Prerequisites
 
-- Python 3.11+
-- [UV](https://docs.astral.sh/uv/getting-started/installation/) package manager
-- [Ollama](https://ollama.ai/) installed and running
+- **Option 1**: Python 3.11+ and [UV](https://docs.astral.sh/uv/getting-started/installation/) package manager
+- **Option 2**: Docker and Docker Compose
 - Anthropic API key
 
 ### Installation
+
+#### Option 1: Local Installation
 
 1. Install UV package manager:
    ```bash
@@ -77,6 +78,46 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
    # CHROMA_DB_PATH=db
    ```
 
+#### Option 2: Docker Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd langgraph-mem0
+   ```
+
+2. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   # Edit .env and set your ANTHROPIC_API_KEY
+   ```
+
+3. Start the services using Docker Compose:
+   ```bash
+   # Start all services (Ollama + App)
+   docker-compose up -d
+   
+   # Pull the embedding model (first time only)
+   docker-compose run --rm ollama-setup
+   
+   # View logs
+   docker-compose logs -f app
+   ```
+
+4. Access the application:
+   ```bash
+   # Interactive mode
+   docker-compose exec app uv run python main.py
+   
+   # Demo mode
+   docker-compose exec app uv run python example_demo.py
+   ```
+
+5. Stop the services:
+   ```bash
+   docker-compose down
+   ```
+
 ## Usage
 
 ### Interactive Mode
@@ -99,6 +140,18 @@ python example_demo.py
 
 Choose option 1 for an automated demo or option 2 for interactive mode.
 
+### Docker Benefits
+
+Using Docker provides several advantages:
+
+- **Simplified Setup**: No need to install Python, UV, or Ollama locally
+- **Consistent Environment**: Same runtime across all systems
+- **Isolation**: Application runs in isolated containers
+- **Easy Cleanup**: Remove everything with `docker-compose down`
+- **Automatic Ollama Setup**: Embedded model automatically downloads
+
+**Note**: Docker setup includes persistent volumes for database and logs, so your data persists between container restarts.
+
 ## Configuration
 
 The memory system is configured in `main.py` with the following components:
@@ -114,9 +167,14 @@ The memory system is configured in `main.py` with the following components:
    main.py              # Core MemoryAgent implementation
    example_demo.py      # Demonstration script
    db/                  # ChromaDB vector store data
+   logs/                # Security and application logs
    .env.example         # Environment variables template
    pyproject.toml       # Project configuration
+   Dockerfile           # Docker container configuration
+   docker-compose.yml   # Multi-service Docker setup
+   .dockerignore        # Docker build exclusions
    CLAUDE.md           # Development guidance
+   SECURITY.md         # Security guidelines
 ```
 
 ## Dependencies

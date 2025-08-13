@@ -28,6 +28,8 @@ Before running the application:
 
 ## Common Commands
 
+### Local Development
+
 **Install dependencies:**
 ```bash
 uv sync
@@ -43,12 +45,49 @@ python main.py
 python example_demo.py
 ```
 
+### Docker Development
+
+**Start all services:**
+```bash
+docker-compose up -d
+```
+
+**Setup Ollama model (first time):**
+```bash
+docker-compose run --rm ollama-setup
+```
+
+**Run interactive demo:**
+```bash
+docker-compose exec app uv run python main.py
+```
+
+**Run example demo:**
+```bash
+docker-compose exec app uv run python example_demo.py
+```
+
+**View logs:**
+```bash
+docker-compose logs -f app
+```
+
+**Stop services:**
+```bash
+docker-compose down
+```
+
 ## Key Files
 
 - `main.py` - Core MemoryAgent implementation and interactive CLI
 - `example_demo.py` - Demonstration script showing memory capabilities
 - `db/` - ChromaDB vector store data (auto-created)
 - `pyproject.toml` - Project dependencies and configuration
+- `Dockerfile` - Container configuration for the application
+- `docker-compose.yml` - Multi-service Docker setup with Ollama
+- `.dockerignore` - Docker build exclusions
+- `SECURITY.md` - Security guidelines and configuration documentation
+- `security.log` - Security events and monitoring log (auto-created)
 
 ## Memory Configuration
 
@@ -58,6 +97,19 @@ The memory system is fully configurable via required environment variables in `M
 - **ChromaDB vector store**: Database path and collection name via `CHROMA_DB_PATH` and `CHROMA_COLLECTION_NAME`
 
 All configuration must be specified via environment variables - no defaults are provided to ensure explicit configuration.
+
+## Security Features
+
+The application implements multiple security layers:
+
+- **Input Validation**: All user inputs are sanitized and validated to prevent injection attacks
+- **Rate Limiting**: 20 requests per minute, 100 per hour per user to prevent abuse
+- **Environment Security**: Mandatory validation of all configuration variables
+- **Error Handling**: Secure error messages that don't expose system internals
+- **Memory Protection**: Content validation before storage to prevent malicious data persistence
+- **Security Logging**: Comprehensive monitoring and alerting for security events
+
+See `SECURITY.md` for detailed security configuration and best practices.
 
 ## Dependencies
 
