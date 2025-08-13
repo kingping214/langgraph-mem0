@@ -2,8 +2,6 @@ import os
 import re
 import html
 import logging
-import time
-from collections import defaultdict, deque
 from typing import Dict, Any, Optional
 from dotenv import load_dotenv
 from langgraph.graph import StateGraph, END
@@ -56,13 +54,6 @@ class MemoryAgent:
         self.anthropic = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
         self.max_input_length = 10000  # Maximum input length
         self.max_memory_length = 5000  # Maximum memory content length
-        
-        # Rate limiting configuration
-        self.rate_limits = {
-            'requests_per_minute': 20,
-            'requests_per_hour': 100
-        }
-        self.user_requests = defaultdict(lambda: {'minute': deque(), 'hour': deque()})
         
         # Configure mem0 to use Ollama for embeddings and Anthropic for LLM
         self.memory = Memory.from_config({
@@ -171,43 +162,10 @@ class MemoryAgent:
         # Apply same sanitization as input
         return self._sanitize_input(content)
     
-    def _check_rate_limit(self, user_id: str) -> bool:
-        """Check if user has exceeded rate limits"""
-        current_time = time.time()
-        user_data = self.user_requests[user_id]
-        
-        # Clean old requests (older than 1 hour)
-        while user_data['hour'] and current_time - user_data['hour'][0] > 3600:
-            user_data['hour'].popleft()
-        
-        # Clean old requests (older than 1 minute)
-        while user_data['minute'] and current_time - user_data['minute'][0] > 60:
-            user_data['minute'].popleft()
-        
-        # Check rate limits
-        if len(user_data['minute']) >= self.rate_limits['requests_per_minute']:
-            security_logger.warning(f"Rate limit exceeded (per minute) for user {user_id}")
-            return False
-        
-        if len(user_data['hour']) >= self.rate_limits['requests_per_hour']:
-            security_logger.warning(f"Rate limit exceeded (per hour) for user {user_id}")
-            return False
-        
-        # Add current request
-        user_data['minute'].append(current_time)
-        user_data['hour'].append(current_time)
-        
-        return True
-        
     def retrieve_memory(self, state: AgentState) -> Dict[str, Any]:
         """Retrieve relevant memories for the current conversation"""
         user_id = state["user_id"]
         last_message = state["messages"][-1].content if state["messages"] else ""
-        
-        # Check rate limiting
-        if not self._check_rate_limit(user_id):
-            security_logger.warning(f"Rate limit exceeded for user {user_id}")
-            return {"memory_retrieved": {"memories": [], "count": 0, "rate_limited": True}}
         
         # Validate and sanitize the search query
         try:
@@ -253,12 +211,6 @@ class MemoryAgent:
         messages = state["messages"]
         memory_data = state.get("memory_retrieved", {})
         memories = memory_data.get("memories", [])
-        
-        # Check if rate limited
-        if memory_data.get("rate_limited", False):
-            return {
-                "messages": [{"role": "assistant", "content": "I apologize, but you've exceeded the rate limit. Please wait a moment before sending another message."}]
-            }
         
         # Build context from memories
         memory_context = ""
