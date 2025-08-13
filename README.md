@@ -2,13 +2,15 @@
 
 A demonstration of an AI agent with persistent memory capabilities using LangGraph for workflow orchestration and Mem0 for long-term memory management.
 
+> \ud83d\ude80 **Quick Start**: Jump to the [Quick Demo section](#-quick-demo-start-here) to see the memory capabilities in action!
+
 ## Features
 
 - **Persistent Memory**: Remembers user conversations across sessions using Mem0
 - **Contextual Responses**: Retrieves relevant memories to provide personalized interactions
 - **Local Embeddings**: Uses Ollama for privacy-focused embedding generation
 - **Workflow Orchestration**: LangGraph manages the memory retrieval and response generation flow
-- **Multiple Interfaces**: Both interactive CLI and demonstration scripts available
+- **Multiple Interfaces**: Interactive demos, CLI mode, and production-ready REST API
 
 ## Architecture
 
@@ -21,17 +23,15 @@ The system consists of two main workflow nodes:
 User Input → Retrieve Memory → Generate Response (with context) → Store New Memory
 ```
 
-## Setup
+## Quick Start
 
 ### Prerequisites
 
-- **Option 1**: Python 3.11+ and [UV](https://docs.astral.sh/uv/getting-started/installation/) package manager
-- **Option 2**: Docker and Docker Compose
+- Python 3.11+ and [UV](https://docs.astral.sh/uv/getting-started/installation/) package manager
 - Anthropic API key
+- **OR** Docker and Docker Compose (for API server)
 
-### Installation
-
-#### Option 1: Local Installation
+### Local Installation (Recommended for Demos)
 
 1. Install UV package manager:
    ```bash
@@ -78,7 +78,7 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
    # CHROMA_DB_PATH=db
    ```
 
-#### Option 2: Docker Installation
+### Docker Installation (For API Server)
 
 1. Clone the repository:
    ```bash
@@ -94,7 +94,7 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
 
 3. Start the services using Docker Compose:
    ```bash
-   # Start all services (Ollama + App)
+   # Start all services (API server runs by default)
    docker-compose up -d
    
    # Pull the embedding model (first time only)
@@ -104,53 +104,113 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
    docker-compose logs -f app
    ```
 
-4. Access the application:
+4. Access the API:
    ```bash
-   # Interactive mode
-   docker-compose exec app uv run python main.py
+   # API available at http://localhost:8000
+   curl http://localhost:8000/health
    
-   # Demo mode
-   docker-compose exec app uv run python example_demo.py
+   # Send a chat message
+   curl -X POST "http://localhost:8000/chat" \
+        -H "Content-Type: application/json" \
+        -d '{"message": "Hello!", "user_id": "user123"}'
    ```
 
-5. Stop the services:
+5. Optional CLI access:
+   ```bash
+   # Interactive CLI mode (override API server)
+   docker-compose exec app uv run python main.py
+   ```
+
+6. Stop the services:
    ```bash
    docker-compose down
    ```
 
 ## Usage
 
-### Interactive Mode
+### 🚀 Quick Demo (Start Here!)
 
-Run the main interactive demo:
-
-```bash
-python main.py
-```
-
-This starts a conversational interface where the agent will remember your preferences and past interactions across sessions.
-
-### Example Demonstration
-
-Run the structured demo to see memory capabilities:
+See the memory capabilities in action with the structured demonstration:
 
 ```bash
 python example_demo.py
 ```
 
-Choose option 1 for an automated demo or option 2 for interactive mode.
+**What this shows:**
+- Agent learns user details (name, profession, preferences)
+- Demonstrates memory persistence across conversation topics
+- Shows contextual recall when asked "What do you remember about me?"
+- Choose option 1 for automated demo or option 2 for interactive mode
 
-### Docker Benefits
+**Sample interaction:**
+```
+> "Hi, my name is Alice and I'm a software developer from San Francisco."
+< "Nice to meet you, Alice! It's great to connect with a fellow software developer..."
 
-Using Docker provides several advantages:
+> "What do you remember about me?"
+< "I remember that you're Alice, a software developer from San Francisco. You mentioned..."
+```
 
+### 💬 Interactive CLI Mode
+
+For ongoing conversations with persistent memory:
+
+```bash
+python main.py
+```
+
+**Features:**
+- Remembers everything across sessions (restart the program and it still knows you)
+- Personalized responses based on past conversations
+- Type 'quit' to exit
+- All conversations stored with user ID for memory retrieval
+
+### 🌐 REST API (Production Ready)
+
+For integration with other applications or production deployment:
+
+**Available Endpoints:**
+- `GET /health` - Health check
+- `POST /chat` - Send chat messages
+- `POST /memory/search` - Search user memories  
+- `DELETE /memory/{user_id}` - Clear user memories
+
+**Example API Usage:**
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Chat with the agent
+curl -X POST "http://localhost:8000/chat" \
+     -H "Content-Type: application/json" \
+     -d '{"message": "Hi, my name is Alice", "user_id": "user123"}'
+
+# Search memories
+curl -X POST "http://localhost:8000/memory/search" \
+     -H "Content-Type: application/json" \
+     -d '{"query": "name", "user_id": "user123"}'
+
+# Clear memories
+curl -X DELETE "http://localhost:8000/memory/user123"
+```
+
+**API Benefits:**
+- Rate limiting and security features built-in
+- Proper error handling and logging
+- Ready for production deployment
+- Supports multiple concurrent users
+
+**Docker Benefits for Production:**
 - **Simplified Setup**: No need to install Python, UV, or Ollama locally
 - **Consistent Environment**: Same runtime across all systems
 - **Isolation**: Application runs in isolated containers
 - **Easy Cleanup**: Remove everything with `docker-compose down`
 - **Automatic Ollama Setup**: Embedded model automatically downloads
+- **Production Ready**: API server with health checks and proper error handling
 
 **Note**: Docker setup includes persistent volumes for database and logs, so your data persists between container restarts.
+
+**For learning and demos**, we recommend the local installation to better understand the components.
 
 ## Configuration
 
@@ -164,7 +224,8 @@ The memory system is configured in `main.py` with the following components:
 ## Project Structure
 
 ```
-   main.py              # Core MemoryAgent implementation
+   main.py              # Core MemoryAgent implementation and CLI
+   api.py               # FastAPI server exposing REST API
    example_demo.py      # Demonstration script
    db/                  # ChromaDB vector store data
    logs/                # Security and application logs
@@ -184,6 +245,21 @@ The memory system is configured in `main.py` with the following components:
 - **Anthropic**: Claude API integration
 - **Ollama**: Local embedding generation
 - **ChromaDB**: Vector database for memory storage
+- **FastAPI**: REST API framework
+- **Uvicorn**: ASGI server for production deployment
+- **SlowAPI**: Rate limiting middleware
+
+## Rate Limiting
+
+The API includes built-in rate limiting to prevent abuse:
+
+- **Chat/Memory endpoints**: 20 requests/minute, 100 requests/hour (configurable)
+- **Health endpoint**: 60 requests/minute 
+- **Memory deletion**: 10 requests/minute, 30 requests/hour
+- **Uses in-memory storage** - No Redis required
+- **Configurable via environment variables**:
+  - `RATE_LIMIT_REQUESTS_PER_MINUTE=20`
+  - `RATE_LIMIT_REQUESTS_PER_HOUR=100`
 
 ## Memory Persistence
 
@@ -194,13 +270,42 @@ Each user is identified by a `user_id`, and all conversations are stored persist
 - Provide contextual responses based on past conversations
 - Maintain separate memory spaces for different users
 
-## Example Interactions
+## Example Memory Scenarios
 
-The demo showcases scenarios like:
+### Scenario 1: Initial Introduction
+```
+User: "Hi, my name is Alice and I'm a software developer from San Francisco. 
+       I love working with Python and machine learning projects."
 
-1. **User introduces themselves**: "Hi, my name is Alice and I'm a software developer from San Francisco."
-2. **Agent remembers later**: When asked "What do you remember about me?", the agent recalls name, profession, and location.
-3. **Contextual responses**: Future conversations reference past preferences and information.
+Agent: "Nice to meet you, Alice! It's great to connect with a fellow 
+        software developer from San Francisco. Python and ML are 
+        fascinating fields - what kind of ML projects do you enjoy most?"
+```
+
+### Scenario 2: Preference Learning
+```
+User: "I prefer working in the mornings, usually starting at 7 AM. 
+       I'm vegetarian and love Italian cuisine."
+
+Agent: "That's an early start, Alice! Morning productivity can be great. 
+        And Italian cuisine has so many wonderful vegetarian options..."
+```
+
+### Scenario 3: Memory Recall (Later Session)
+```
+User: "What do you remember about me?"
+
+Agent: "I remember quite a bit about you, Alice! You're a software 
+        developer from San Francisco who loves Python and machine 
+        learning projects. You're an early bird who starts work at 7 AM, 
+        and you're vegetarian with a preference for Italian cuisine."
+```
+
+**Key Demonstration Points:**
+- Cross-session memory persistence
+- Contextual understanding and recall
+- Personalized responses based on learned preferences
+- Natural conversation flow with memory integration
 
 ## Development
 

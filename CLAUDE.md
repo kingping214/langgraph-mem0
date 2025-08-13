@@ -28,26 +28,26 @@ Before running the application:
 
 ## Common Commands
 
-### Local Development
+### Local Development (Recommended for Demos)
 
 **Install dependencies:**
 ```bash
 uv sync
 ```
 
-**Run the main interactive demo:**
-```bash
-python main.py
-```
-
-**Run the example demonstration script:**
+**Run the example demonstration script (start here!):**
 ```bash
 python example_demo.py
 ```
 
-### Docker Development
+**Run the interactive CLI demo:**
+```bash
+python main.py
+```
 
-**Start all services:**
+### Docker Development (API Server)
+
+**Start all services (API server runs by default):**
 ```bash
 docker-compose up -d
 ```
@@ -57,14 +57,39 @@ docker-compose up -d
 docker-compose run --rm ollama-setup
 ```
 
-**Run interactive demo:**
+**API will be available at:** `http://localhost:8000`
+
+**API Endpoints:**
+- `GET /health` - Health check
+- `POST /chat` - Send chat messages
+- `POST /memory/search` - Search user memories
+- `DELETE /memory/{user_id}` - Clear user memories
+
+**Example API usage:**
+```bash
+# Check API health
+curl http://localhost:8000/health
+
+# Send a chat message
+curl -X POST "http://localhost:8000/chat" \
+     -H "Content-Type: application/json" \
+     -d '{"message": "Hello!", "user_id": "user123"}'
+
+# Search memories
+curl -X POST "http://localhost:8000/memory/search" \
+     -H "Content-Type: application/json" \
+     -d '{"query": "previous conversations", "user_id": "user123"}'
+```
+
+**Run interactive CLI demo (override default API command):**
 ```bash
 docker-compose exec app uv run python main.py
 ```
 
-**Run example demo:**
+**Run example demo (local development only):**
 ```bash
-docker-compose exec app uv run python example_demo.py
+# Note: example_demo.py is designed for local development
+# For Docker users, use the interactive CLI or API instead
 ```
 
 **View logs:**
@@ -80,10 +105,11 @@ docker-compose down
 ## Key Files
 
 - `main.py` - Core MemoryAgent implementation and interactive CLI
-- `example_demo.py` - Demonstration script showing memory capabilities
+- `api.py` - FastAPI server exposing the MemoryAgent as REST API
+- `example_demo.py` - Demonstration script showing memory capabilities (local only)
 - `db/` - ChromaDB vector store data (auto-created)
 - `pyproject.toml` - Project dependencies and configuration
-- `Dockerfile` - Container configuration for the application
+- `Dockerfile` - Container configuration for API server
 - `docker-compose.yml` - Multi-service Docker setup with Ollama
 - `.dockerignore` - Docker build exclusions
 - `SECURITY.md` - Security guidelines and configuration documentation
@@ -103,7 +129,7 @@ All configuration must be specified via environment variables - no defaults are 
 The application implements multiple security layers:
 
 - **Input Validation**: All user inputs are sanitized and validated to prevent injection attacks
-- **Rate Limiting**: 20 requests per minute, 100 per hour per user to prevent abuse
+- **Rate Limiting**: Configurable per-IP rate limiting (see Rate Limiting section below)
 - **Environment Security**: Mandatory validation of all configuration variables
 - **Error Handling**: Secure error messages that don't expose system internals
 - **Memory Protection**: Content validation before storage to prevent malicious data persistence
@@ -119,3 +145,26 @@ Key dependencies include:
 - `anthropic>=0.34.0` - Claude API client
 - `ollama>=0.5.3` - Local embeddings
 - `chromadb>=1.0.16` - Vector database
+- `fastapi>=0.104.0` - REST API framework
+- `uvicorn[standard]>=0.24.0` - ASGI server
+- `slowapi>=0.1.9` - Rate limiting middleware
+
+## Rate Limiting
+
+The API includes configurable rate limiting to prevent abuse:
+
+### Default Limits
+- **Chat/Memory endpoints**: 20 requests/minute, 100 requests/hour
+- **Health endpoint**: 60 requests/minute (more generous)
+- **Memory deletion**: 10 requests/minute, 30 requests/hour (more restrictive)
+- **Root endpoint**: 30 requests/minute
+
+### Configuration
+Rate limits can be configured via environment variables:
+- `RATE_LIMIT_REQUESTS_PER_MINUTE` (default: 20)
+- `RATE_LIMIT_REQUESTS_PER_HOUR` (default: 100)
+
+### Implementation
+- Uses in-memory storage (no Redis required)
+- Rate limiting is applied per IP address
+- Returns HTTP 429 when limits are exceeded

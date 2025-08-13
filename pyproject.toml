@@ -1,7 +1,7 @@
 [project]
 name = "langgraph-mem0"
 version = "0.1.0"
-description = "A demonstration of an AI agent with persistent memory capabilities using LangGraph for workflow orchestration and Mem0 for long-term memory management."
+description = "Interactive demo showcasing an AI agent with persistent memory capabilities. Features hands-on examples, CLI interface, and API using LangGraph + Mem0."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -11,4 +11,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "ollama>=0.5.3",
     "chromadb>=1.0.16",
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "slowapi>=0.1.9",
 ]
