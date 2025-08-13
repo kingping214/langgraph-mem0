@@ -24,7 +24,7 @@ The agent maintains persistent memory per user_id across sessions, storing conve
 Before running the application:
 1. Copy `.env.example` to `.env` and set `ANTHROPIC_API_KEY`
 2. Ensure Ollama is running locally on port 11434 with the `nomic-embed-text:latest` model
-3. Install dependencies using `uv` (preferred) or `pip`
+3. Install dependencies using `uv`
 
 ## Common Commands
 

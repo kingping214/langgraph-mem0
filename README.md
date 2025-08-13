@@ -37,14 +37,9 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
    cd langgraph-mem0
    ```
 
-2. Install dependencies using UV (recommended):
+2. Install dependencies:
    ```bash
    uv sync
-   ```
-   
-   Or with pip:
-   ```bash
-   pip install -r requirements.txt
    ```
 
 3. Set up Ollama embeddings model:
