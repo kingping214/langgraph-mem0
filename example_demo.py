@@ -109,12 +109,17 @@ if __name__ == "__main__":
     print("1. Run automated demo scenario")
     print("2. Interactive session")
     
-    choice = input("\nEnter your choice (1 or 2): ").strip()
-    
-    if choice == "1":
-        demo_conversation()
-    elif choice == "2":
-        interactive_session()
-    else:
-        print("Invalid choice. Running interactive session by default.")
-        interactive_session()
+    while True:
+        choice = input("\nEnter your choice (1 or 2): ").strip()
+        
+        if choice == "1":
+            demo_conversation()
+            break
+        elif choice == "2":
+            interactive_session()
+            break
+        else:
+            if not choice:
+                print("Please enter a choice.")
+            else:
+                print(f"Invalid choice '{choice}'. Please enter 1 or 2.")

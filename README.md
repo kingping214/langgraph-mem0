@@ -52,7 +52,14 @@ User Input → Retrieve Memory → Generate Response (with context) → Store Ne
    uv sync
    ```
 
-4. Set up Ollama embeddings model:
+4. Install and set up Ollama:
+   ```bash
+   # Install Ollama (macOS/Linux)
+   curl -fsSL https://ollama.ai/install.sh | sh
+   ```
+   Or download from [https://ollama.ai](https://ollama.ai) for other platforms.
+
+   Then pull the embeddings model:
    ```bash
    ollama pull nomic-embed-text:latest
    ```
