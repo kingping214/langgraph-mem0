@@ -205,3 +205,11 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project-specific
+# ChromaDB database files (contains user memory data)
+db/
+*.sqlite3
+
+# Python version file (uncommented for this project)
+.python-version
