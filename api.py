@@ -120,19 +120,19 @@ async def health_check(request: Request):
 @app.post("/chat", response_model=ChatResponse)
 @limiter.limit(lambda: f"{get_rate_limits()[0]}/minute")  # Configurable per minute
 @limiter.limit(lambda: f"{get_rate_limits()[1]}/hour")    # Configurable per hour
-async def chat(http_request: Request, request: ChatRequest, agent_data=Depends(get_agent)):
+async def chat(request: Request, chat_request: ChatRequest, agent_data=Depends(get_agent)):
     """Main chat endpoint"""
     agent, graph = agent_data
     
     try:
         # Validate input length (additional validation beyond Pydantic)
-        if len(request.message.strip()) == 0:
+        if len(chat_request.message.strip()) == 0:
             raise HTTPException(status_code=400, detail="Message cannot be empty")
         
         # Run the graph
         result = graph.invoke({
-            "messages": [{"role": "user", "content": request.message}],
-            "user_id": request.user_id
+            "messages": [{"role": "user", "content": chat_request.message}],
+            "user_id": chat_request.user_id
         })
         
         # Extract response
@@ -146,55 +146,55 @@ async def chat(http_request: Request, request: ChatRequest, agent_data=Depends(g
         memory_data = result.get("memory_retrieved", {})
         memory_count = memory_data.get("count", 0)
         
-        security_logger.info(f"Successful chat interaction for user {request.user_id}")
+        security_logger.info(f"Successful chat interaction for user {chat_request.user_id}")
         
         return ChatResponse(
             response=assistant_message,
-            user_id=request.user_id,
+            user_id=chat_request.user_id,
             memory_count=memory_count
         )
         
     except HTTPException:
         raise
     except Exception as e:
-        security_logger.error(f"Chat error for user {request.user_id}: {type(e).__name__}: {str(e)}")
+        security_logger.error(f"Chat error for user {chat_request.user_id}: {type(e).__name__}: {str(e)}")
         raise HTTPException(status_code=500, detail="An error occurred while processing your message")
 
 @app.post("/memory/search", response_model=MemorySearchResponse)
 @limiter.limit(lambda: f"{get_rate_limits()[0]}/minute")  # Same limits as chat
 @limiter.limit(lambda: f"{get_rate_limits()[1]}/hour")
-async def search_memory(http_request: Request, request: MemorySearchRequest, agent_data=Depends(get_agent)):
+async def search_memory(request: Request, search_request: MemorySearchRequest, agent_data=Depends(get_agent)):
     """Search memories for a user"""
     agent, _ = agent_data
     
     try:
         # Search for memories
         memories_result = agent.memory.search(
-            query=request.query, 
-            user_id=request.user_id
+            query=search_request.query, 
+            user_id=search_request.user_id
         )
         
         memories = memories_result.get('results', []) if isinstance(memories_result, dict) else memories_result
         
         # Limit results
-        limited_memories = memories[:request.limit] if request.limit else memories
+        limited_memories = memories[:search_request.limit] if search_request.limit else memories
         
-        security_logger.info(f"Memory search performed for user {request.user_id}")
+        security_logger.info(f"Memory search performed for user {search_request.user_id}")
         
         return MemorySearchResponse(
             memories=limited_memories,
             count=len(limited_memories),
-            user_id=request.user_id
+            user_id=search_request.user_id
         )
         
     except Exception as e:
-        security_logger.error(f"Memory search error for user {request.user_id}: {type(e).__name__}")
+        security_logger.error(f"Memory search error for user {search_request.user_id}: {type(e).__name__}")
         raise HTTPException(status_code=500, detail="An error occurred while searching memories")
 
 @app.delete("/memory/{user_id}")
 @limiter.limit("10/minute")  # More restrictive for deletion operations
 @limiter.limit("30/hour")
-async def clear_memory(http_request: Request, user_id: str, agent_data=Depends(get_agent)):
+async def clear_memory(request: Request, user_id: str, agent_data=Depends(get_agent)):
     """Clear all memories for a user"""
     agent, _ = agent_data
     
