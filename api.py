@@ -79,7 +79,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="LangGraph Mem0 API",
     description="AI Agent with persistent memory capabilities",
-    version="1.0.0",
+    version="0.1.0",
     lifespan=lifespan
 )
 
@@ -217,7 +217,7 @@ async def root(request: Request):
     """Root endpoint with API information"""
     return {
         "message": "LangGraph Mem0 API",
-        "version": "1.0.0",
+        "version": "0.1.0",
         "endpoints": {
             "health": "/health",
             "chat": "/chat",
