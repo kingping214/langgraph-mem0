@@ -3,6 +3,7 @@ name = "langgraph-mem0"
 version = "0.1.0"
 description = "Interactive demo showcasing an AI agent with persistent memory capabilities. Features hands-on examples, CLI interface, and API using LangGraph + Mem0."
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
     "langgraph>=0.2.0",

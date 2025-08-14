@@ -160,3 +160,7 @@ Rate limits can be configured via environment variables:
 - Uses in-memory storage (no Redis required)
 - Rate limiting is applied per IP address
 - Returns HTTP 429 when limits are exceeded
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for the full license text.
